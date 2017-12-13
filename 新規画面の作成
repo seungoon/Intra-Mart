@@ -1,0 +1,67 @@
+
+１．ポイント内容
+　・初期化処理
+ 　　/**
+     * Hello Worldでは特別に処理を行わないため未処理
+     * 初期化等が必要な場合はinit()にその処理を記述していく。
+     */
+    function init(request) {
+      //初期化処理
+    }
+    
+    /**
+     * 出力結果のバインド変数
+     */
+    var name;
+
+    /**
+     * 初期表示
+     * 名前を渡す
+     */
+    function init(request) {
+      name = 'Hello, ' + request['name'];     // 出力結果を作成し、バインド変数へ格納
+    }
+
+　・ルーティング設定ファイルの作成
+　　ルーティング用の xml ( helloworld.xml )を作成します。
+　　プロジェクトの src/main/conf/routing-jssp-config/ の配下に helloworld.xml のファイルを作成し、以下のようにファイルのマッピング情報を記述します。
+　　認可の設定に当たる authz-default の mapper 属性には “welcome-all” を設定します。
+　　URLの設定に当たる file-mapping には、 path 属性に2つの画面のURLを、 page 属性に2つの画面のファイルパスをそれぞれ設定します。
+  
+  　<?xml version="1.0" encoding="UTF-8"?>
+    <routing-jssp-config 
+      xmlns="http://www.intra-mart.jp/router/routing-jssp-config" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:schemaLocation="http://www.intra-mart.jp/router/routing-jssp-config routing-jssp-config.xsd ">
+
+      <authz-default mapper="welcome-all" />
+
+      <file-mapping path="/helloworld/input" page="/helloworld/js/input" />
+      <file-mapping path="/helloworld/output" page="/helloworld/js/output" />
+    </routing-jssp-config>
+    
+    ------------------------------------------------------------------------------------------------------------
+    <?xml version="1.0" encoding="UTF-8"?>
+    <routing-jssp-config
+        xmlns="http://www.intra-mart.jp/router/routing-jssp-config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.intra-mart.jp/router/routing-jssp-config routing-jssp-config.xsd">
+
+        <authz-default mapper="welcome-all" />
+
+        <file-mapping path="/app/foo" page="business/foo" />
+
+        <file-mapping path="/app/baz" page="business/baz">
+            <authz uri="service://app/baz" action="execute" />
+        </file-mapping>
+
+    </routing-jssp-config>
+    authz-default要素にはwelcome-allリソースマッパーが指定されています。この認可リソースマッパーは開発中に使用するものであり、アプリケーションリリース時には適したuriとactionまたはmapperを指定することを強く推奨します。
+    /app/foo へのアクセスの場合、file-mapping要素内にauthz要素が存在しないため、デフォルト認可設定であるwelcome-allマッパーが認可設定として有効になります。
+    /app/baz へのアクセスの場合、file-mapping要素内にauthz要素が存在するため、uriがservice://app/baz、actionがexecuteが認可設定として有効になります。
+    authz-default要素、authz要素共に省略可能ですが、file-mappingに対して有効な認可設定が指定されていない場合は設定エラーとなります。
+    メニュー項目はアクセス先のURLに対して権限がある物のみ表示されます。
+
+
+
+※参考サイト：https://www.intra-mart.jp/download/product/iap/development/script_programming_guide/texts/basic/index.html#ステップ1：プロジェクトの作成と設定
