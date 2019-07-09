@@ -1,0 +1,87 @@
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import jp.co.intra_mart.common.platform.log.Logger;
+import jp.co.intra_mart.foundation.mail.javamail.JavaMailSender;
+import jp.co.intra_mart.foundation.mail.javamail.StandardMail;
+import jp.co.intra_mart.foundation.service.provider.application.HTTPActionEvent;
+import jp.co.intra_mart.foundation.service.provider.application.HTTPActionEventContext;
+import jp.co.intra_mart.framework.base.event.EventException;
+import jp.co.intra_mart.framework.base.event.EventManager;
+import jp.co.intra_mart.framework.base.event.EventManagerException;
+import jp.co.intra_mart.framework.base.event.EventPropertyException;
+import jp.co.intra_mart.framework.base.util.UserInfo;
+import jp.co.intra_mart.framework.base.util.UserInfoUtil;
+import jp.co.intra_mart.framework.system.exception.ApplicationException;
+import jp.co.intra_mart.framework.system.exception.SystemException;
+
+public final class TestServiceController implements HTTPActionEvent {
+
+	  /** ログ出力用オブジェクト */
+    private static final Logger LOG = Logger.getLogger(TestServiceController.class);
+    
+    /**
+	  * コンストラクター
+	  */
+	  public TestServiceController() {
+		  super();
+	  }
+    
+    @Override
+	  public void action(HTTPActionEventContext context, HttpServletRequest request, HttpServletResponse response)
+			throws ServletException {
+
+		  // イベント管理クラスの定義
+		  EventManager eventManager = null;
+      
+      // 変数の定義
+		  boolean isError = false;
+      
+		  try {
+			  // ユーザー情報の取得
+	      UserInfo userInfo = UserInfoUtil.createUserInfo(request, response);
+        
+        eventManager = EventManager.getEventManager();
+			  event = (XXXEvent) eventManager
+					.createEvent(XXX, XXX, userInfo);
+
+			  // イベントの実行
+			  eventResult = (XXX) eventManager.dispatch(event)
+		  } catch (EventManagerException e) {
+            LOG.error(XXX, e);
+      } catch (EventPropertyException e) {
+            LOG.error(XXX, e);
+      } catch (EventException e) {
+            LOG.error(XXX, e);
+      } catch (ApplicationException e) {
+            LOG.error(XXX, e);
+      } catch (SystemException e) {
+            LOG.error(XXX, e);
+      }
+        
+		  // バッチ実行結果の設定
+		  String status = "";
+      if (isError) {
+        	// 処理失敗
+          status = "8";
+      } else {
+        	// 処理成功
+          status = "0";
+      }
+        
+      response.setContentType("text/plain");
+        
+      try {
+          Writer out = response.getWriter();
+          out.write(status);
+      } catch (IOException e) {
+          LOG.error(XXX, e);
+      }
+	  }
+ }
