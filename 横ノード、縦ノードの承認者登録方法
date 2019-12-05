@@ -1,0 +1,235 @@
+※OutputのJsoｎ項目を作成する。
+var rObjItem = {
+    "applyAuthUserCode": "",
+    "applyBaseDate": null,
+    "companyCode": "",
+    "orgzCode": "",
+    "orgzSetCode": "",
+    "flowId": "",
+    "matterName": "",
+    "horizontalNodeConfigInfo": null,
+    "verticalNodeConfigInfo": null
+  };
+
+■横ノードの承認者登録
+    
+rObjItem.horizontalNodeConfigInfo = makeHorizontalNodeConfigInfo(input);
+
+/**
+ * 横配置ノードを作成する。
+ * 
+ * @param input {Object} - task input data.
+ * @return {Object} VerticalNodeConfigInfo.
+ */
+function makeHorizontalNodeConfigInfo(input) {
+
+  var horizontalNodeConfigInfo = [];
+
+  var node = [];
+
+  // 横配置ノード１：承認
+  node = makeHorizontalNode(input);
+  horizontalNodeConfigInfo.push(node);
+
+  return horizontalNodeConfigInfo;
+}
+
+/**
+ * 指定ノードを作成する。
+ *
+ * @param input {Object} - task input data.
+ * @param rowNumber {Integer} - 指定ノードの階層番号
+ * @return {Object} 指定ノード.
+ */
+function makeHorizontalNode(input) {
+  
+  var node = [];
+  var nodeId = "test_node1";    // フローで定義したノードIDを指定
+  
+  node = {
+    matterNodeExpansions : makeMatterHorizontalNodeExpansions(input),
+    nodeId : nodeId
+  };
+  
+  return node;
+}
+
+/**
+ * 1ノードに割り当てる承認者情報を作成する。
+ *
+ * @param input {Object} - task input data.
+ * @param roleInfo {Object} - 指定ノードのロール情報
+ * @return {Object} MatterNodeExpansions.
+ */
+function makeMatterHorizontalNodeExpansions(input) {
+  
+  var retMatterNodeExpansions = [];
+  var approver = "";
+  var nodeName = "";
+  
+  // 承認者１
+  var processTargetConfigModels1 = [];
+  approver = "IMログインID";
+  nodeName = "承認ノード１";
+  processTargetConfigModels1.push(makeProcessTargetConfigModel(approver));
+  
+  var matterNodeExpansion = [];
+  matterNodeExpansion = {
+    nodeName : nodeName,
+    processTargetConfigModel : processTargetConfigModels1
+  };  
+  
+  retMatterNodeExpansions.push(matterNodeExpansion);
+  
+  // 承認者２
+  var processTargetConfigModels2 = [];
+  approver = "IMログインID";
+  nodeName = "承認ノード２";
+  processTargetConfigModels2.push(makeProcessTargetConfigModel(approver));
+  
+  matterNodeExpansion = {
+    nodeName : nodeName,
+    processTargetConfigModel : processTargetConfigModels2
+  };  
+  
+  retMatterNodeExpansions.push(matterNodeExpansion);
+
+  return retMatterNodeExpansions;
+}
+
+/**
+ * 承認者情報を作成する。
+ * 
+ * @param approver {String} - 承認者のグロールID
+ * @return {Object} ProcessTargetConfigModel.
+ */
+function makeProcessTargetConfigModel(approver) {
+	
+	var processTargetConfigModel = [];
+	
+  // 承認ノードにユーザIDを指定
+	processTargetConfigModel = {
+	  extensionPointId : "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+	  parameter : approver,
+	  pluginId : "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user"
+	};
+
+  return processTargetConfigModel;
+}
+
+
+■縦ノードの承認者登録
+
+  rObjItem.verticalNodeConfigInfo = makeVerticalNodeConfigInfo(input);
+  
+  
+  
+  /**
+ * 縦配置ノードを作成する。
+ * 
+ * @param input {Object} - task input data.
+ * @return {Object} VerticalNodeConfigInfo.
+ */
+function makeVerticalNodeConfigInfo(input) {
+
+  var verticalNodeConfigInfo = [];
+
+  var node = [];
+
+  // Node1：承認１
+  node = makeVerticalNode(input, 1);
+  verticalNodeConfigInfo.push(node);
+
+  // Node2：承認２
+  node = makeVerticalNode(input, 2);
+  verticalNodeConfigInfo.push(node);
+
+  return verticalNodeConfigInfo;
+}
+
+/**
+ * 指定ノードを作成する。
+ *
+ * @param input {Object} - task input data.
+ * @param rowNumber {Integer} - 指定ノードの階層番号
+ * @return {Object} 指定ノード.
+ */
+function makeVerticalNode(input, rowNumber) {
+  
+  var node = [];
+  var nodeId = "node" + rowNumber;
+
+  // 指定承認階層データを取得
+  var approveData = input.XXX;
+
+  // ノードを作成
+  if (approveData !== null) {
+    node = {
+      matterNodeExpansions : makeMatterVerticalNodeExpansions(input),
+      nodeId : nodeId
+    };  
+    
+  } else {
+    // 審議不要階層でも、必ず空ノードを作成
+    node = {
+      nodeId : nodeId
+    };    
+  } 
+  
+  return node;
+}
+
+/**
+ * 1ノードに割り当てる承認者情報を作成する。
+ *
+ * @param input {Object} - task input data.
+ * @param roleInfo {Object} - 指定ノードのロール情報
+ * @return {Object} MatterNodeExpansions.
+ */
+function makeMatterVerticalNodeExpansions(input) {
+  
+  var retMatterNodeExpansions = [];
+  
+  // 指定承認階層データを取得
+  var approveData = input.XXX;
+
+  var processTargetConfigModels = null;
+
+  // 承認者分ループ
+  for (var i = 0; i < approveData.approversId.length; i++) {
+    var approver = approveData.approversId[i];
+    processTargetConfigModels = [];
+    processTargetConfigModels.push(makeProcessTargetConfigModel(approver));
+    
+    var matterNodeExpansion = [];
+    matterNodeExpansion = {
+      nodeName : approveData.nodeName,
+      processTargetConfigModel : processTargetConfigModels,
+    };  
+    retMatterNodeExpansions.push(matterNodeExpansion);
+  }
+
+  return retMatterNodeExpansions;
+}
+
+/**
+ * 承認者情報を作成する。
+ * 
+ * @param approver {String} - 承認者のグロールID
+ * @return {Object} ProcessTargetConfigModel.
+ */
+function makeProcessTargetConfigModel(approver) {
+	
+	var processTargetConfigModel = [];
+	
+	processTargetConfigModel = {
+	  extensionPointId : "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+	  parameter : approver,
+	  pluginId : "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user"
+	};
+
+  return processTargetConfigModel;
+}
+
+(終)
+
