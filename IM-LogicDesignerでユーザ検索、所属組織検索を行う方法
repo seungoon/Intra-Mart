@@ -1,0 +1,41 @@
+
+
+/**
+ * run.
+ *
+ * @param input {Object} - task input data.
+ * @return {Object} task result.
+ */
+function run(input) {
+    var result = {};
+
+    // 操作ユーザのロケール
+    let locale = Contexts.getAccountContext().locale;
+
+    // ユーザ検索
+    let userManager = new IMMUserManager();
+    let userResult = userManager.getUser({'userCd': input.userCd}, input.baseDate, locale);
+    if(userResult.error){
+        result.error = true;
+        result.message = userResult.message;
+        return result;
+    }else if(userResult.data === null){
+        result.error = true;
+        result.message = "The user you specified does not exist.";
+        return result;
+    }
+
+    // 所属組織検索
+    let immCompanyManager = new IMMCompanyManager();
+    let departmentResult = immCompanyManager.listDepartmentWithUser({'userCd': input.userCd}, new AppCmnSearchCondition(), true, input.baseDate, locale) ;
+    if(departmentResult.error){
+        departmentResult.error = true;
+        departmentResult.message = departmentResult.message;
+        return result;
+    }
+    result.data = {};
+    result.data.userName = userResult.data.locales[locale].userName;
+    result.data.userSearchName  = userResult.data.locales[locale].userSearchName;
+    result.data.departmentName = (departmentResult.data.length > 0) ? departmentResult.data[0].displayName : '';
+    return result;
+}
