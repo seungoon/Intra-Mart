@@ -1,0 +1,103 @@
+// クライアントタイプ
+var clientType = forma.funcs.getDisplayClientType();
+ 
+// 入力パラメータの取得
+var userInfo = {};
+if(clientType === "pc"){
+  // インディケータ開始
+  $(document.body).imuiIndicator();
+  userInfo.userCd = formaItems.product_72_textbox.getItemData.user_cd();
+  // ISO 8601の拡張形式指定
+  userInfo.baseDate = formaItems.product_72_calendar.getItemData.base_date().toISOString();
+}else{
+  // インディケータ開始
+  $.mobile.loading('show', window.forma.loaderParam);
+  userInfo.userCd = formaItems.product_72_textbox.getItemDataSp({'input_id': 'user_cd'});
+  userInfo.baseDate = formaItems.product_72_calendar.getItemDataSp({'input_id': 'base_date'});
+}
+ 
+// ベースURLの取得
+var baseUrl = jQuery('base').attr('href');
+ 
+// セキュアトークンの取得
+var secureToken = $('form[name=imfr_csrf_check]').find('input[name=im_secure_token]').val();
+
+// REST APIの実行
+$.ajax({
+   type: "POST",
+   // REST APIのURL
+   url: baseUrl + "logic/api/im_cookbook/110542/user_detail_search",
+   headers: {
+    // セキュアトークン
+    'X-Intramart-Secure-Token': secureToken
+  },
+  async: true,
+  dataType: "json",
+  // 入力パラメータ
+  data: userInfo
+ 
+}).done(function(response){
+    if(clientType === "pc"){
+      if(response.error){
+        // エラーメッセージの表示
+        imuiShowErrorMessage(response.message);
+        return;
+      }
+ 
+      // ユーザ名の反映
+      var args = {};
+      args.data = {};
+      args.data.user_name = response.data.userName;
+      formaItems.product_72_textbox.setItemData.user_name(args);
+ 
+      // フリガナの反映
+      args = {};
+      args.data = {};
+      args.data.furigana = response.data.userSearchName;
+      formaItems.product_72_textbox.setItemData.furigana(args);
+ 
+      // 所属組織の反映
+      args = {};
+      args.data = {};
+      args.data.department_name = response.data.departmentName;
+      formaItems.product_72_textbox.setItemData.department_name(args);
+    }else{
+      if(response.error){
+        // エラーメッセージの表示
+        imspShowErrorMessage(response.message);
+        return;
+      }
+ 
+      // ユーザ名の反映
+      formaItems.product_72_textbox.setItemDataSp({'input_id': 'user_name',
+        'inputDataList': {'user_name': response.data.userName}
+      });
+ 
+      // フリガナの反映
+      formaItems.product_72_textbox.setItemDataSp({'input_id': 'furigana',
+        'inputDataList': {'furigana': response.data.userSearchName}
+      });
+ 
+      // 所属組織の反映
+      formaItems.product_72_textbox.setItemDataSp({'input_id': 'department_name',
+        'inputDataList': {'department_name': response.data.departmentName}
+      });
+    }
+ 
+}).fail(function(response){
+  // セッションタイムアウトエラー画面へ遷移
+  if(response.status === 401){
+    location.href = baseUrl + "alert/session_timeout_error.jsp";
+    return;
+  }
+  // システムエラー画面へ遷移
+  location.href = baseUrl + 'alert/http500.jsp';
+ 
+}).always(function(data){
+  if(clientType === "pc"){
+    // インディケータ終了
+    $(document.body).imuiIndicator("destroy");
+  }else{
+    $.mobile.loading('hide', window.forma.loaderParam);
+  }
+});
