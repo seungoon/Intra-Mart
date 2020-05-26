@@ -1,0 +1,15 @@
+※SQL Serverで、ユーザのロール情報取得
+select
+t1.user_cd
+,t1.role_id 
+,t2.display_name
+from
+b_m_account_role_b t1
+,b_m_role_i t2
+where
+t1.user_cd = ''
+-- 有効期間
+t1.valid_start_date  <= SYSDATETIME()
+and t1.valid_end_date >= SYSDATETIME()
+and t1.role_id = t2.role_id
+and locale_id = 'ja'
