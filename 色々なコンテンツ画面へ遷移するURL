@@ -1,0 +1,31 @@
+1. 申請画面（パラメータなし）
+im_workflow/user/apply/apply_direct/%フローID%
+
+%フローID%には、申請したいフローのフローIDを設定してください。
+申請基準日は現在日付で申請画面を表示します。
+
+2. 各種処理画面
+im_workflow/common/switch/switch_content
+
+3. 各種参照画面
+im_workflow/common/switch/switch_content_detail
+
+4. フロー情報画面
+im_workflow/applications/%フローID%/flow-info?applyBaseDate=%申請基準日%
+
+%フローID%には、申請したいフローのフローIDを設定してください。
+%申請基準日%には、表示するフローの基準日を「yyyy/mm/dd」形式（URLエンコード必要）で設定してください。
+
+5. フロー情報画面（特定の案件に対するフロー情報画面）
+im_workflow/matters/%システム案件ID%/flow-info
+
+%システム案件ID%には、表示したい案件のシステム案件IDを設定してください。
+
+6. 履歴情報画面
+im_workflow/matters/%システム案件ID%/history-info
+
+%システム案件ID%には、表示したい案件のシステム案件IDを設定してください。
+
+
+※参考サイト：
+ https://dev.intra-mart.jp/cookbook176038/
